@@ -8,5 +8,6 @@ let () =
         | (1, 1) -> Day01.problem1 data
         | (1, 2) -> Day01.problem2 data
         | (2, 1) -> Day02.problem1 data
+        | (2, 2) -> Day02.problem2 data
         | _ -> failwith "Not implemented" in
     Printf.printf "%d\n" answer

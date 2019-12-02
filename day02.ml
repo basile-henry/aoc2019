@@ -57,11 +57,30 @@ let example4 () =
     step program 0;
     example 4 !program should_be
 
-let problem1 (data : string) =
+let initial_program (data : string) =
     let split_data = String.split_on_char ',' (String.trim data) in
     let ops = List.filter_map int_of_string_opt split_data in
-    let program = ref (Array.of_list ops) in
-    !program.(1) <- 12;
-    !program.(2) <- 2;
+    Array.of_list ops
+
+let run_program (program : int array ref) (noun : int) (verb : int) =
+    !program.(1) <- noun;
+    !program.(2) <- verb;
     step program 0;
     !program.(0)
+
+let problem1 (data : string) =
+    let program = ref (initial_program data) in
+    run_program program 12 2
+
+let problem2 (data : string) =
+    let program = initial_program data in
+    let goal = 19690720 in
+    let combinations =
+        List.concat (List.init 99
+            (fun noun -> List.init 99
+                (fun verb -> (noun, verb)))) in
+    let (noun, verb) =
+        List.find
+          (fun (noun, verb) -> goal = run_program (ref program) noun verb)
+          combinations in
+    noun * 100 + verb
