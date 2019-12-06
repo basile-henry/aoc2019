@@ -35,12 +35,7 @@ let has_two_consecutive x =
     | _ -> failwith "Fewer than 3 digits"
 
 let solve filter =
-    let range_start = 402328 in
-    let range_end = 864247 in
-    let range =
-      List.init
-        (range_end - range_start)
-        (fun i -> range_start + i) in
+    let range = Util.range 402328 864247 in
     let passwords = List.filter filter range in
     List.length passwords
 
