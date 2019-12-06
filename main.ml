@@ -10,6 +10,7 @@ let () =
         | (2, 1) -> Day02.problem1 (data ())
         | (2, 2) -> Day02.problem2 (data ())
         | (3, 1) -> Day03.problem1 (data ())
+        | (3, 2) -> Day03.problem2 (data ())
         | (4, 1) -> Day04.problem1 ()
         | (4, 2) -> Day04.problem2 ()
         | _ -> failwith "Not implemented" in

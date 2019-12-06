@@ -8,7 +8,7 @@ type position =
   ; y : int
   }
 
-module PosSet = Set.Make( 
+module PosMap = Map.Make(
   struct
     let compare a b = 2 * (compare a.x b.x) + compare a.y b.y
     type t = position
@@ -43,8 +43,8 @@ let parse (data : string) : movement list list=
       (fun line -> parse_wire (String.split_on_char ',' line))
       (String.split_on_char '\n' (String.trim data))
 
-let movements_to_set : movement list -> PosSet.t =
-    let rec go current set xs =
+let movements_to_set : movement list -> int PosMap.t =
+    let rec go dist current set xs =
       match xs with
       | [] -> set
       | m::ms -> 
@@ -53,39 +53,45 @@ let movements_to_set : movement list -> PosSet.t =
           | L ->
               let up_to = current.x - m.distance in
               ( Util.range current.x up_to
-                  |> List.map (fun x -> { current with x = x } )
+                  |> List.mapi (fun i x -> ({ current with x = x }, dist + i))
               , { current with x = up_to }
               )
           | U ->
               let up_to = current.y + m.distance in
               ( Util.range current.y up_to
-                  |> List.map (fun y -> { current with y = y } )
+                  |> List.mapi (fun i y -> ({ current with y = y }, dist + i))
               , { current with y = up_to }
               )
           | D ->
               let up_to = current.y - m.distance in
               ( Util.range current.y up_to
-                  |> List.map (fun y -> { current with y = y } )
+                  |> List.mapi (fun i y -> ({ current with y = y }, dist + i))
               , { current with y = up_to }
               )
           | R ->
               let up_to = current.x + m.distance in
               ( Util.range current.x up_to
-                  |> List.map (fun x -> { current with x = x } )
+                  |> List.mapi (fun i x -> ({ current with x = x }, dist + i))
               , { current with x = up_to }
               ) in
+        let new_dist = dist + m.distance in
+        let merge _key a b = Some (min a b) in
         let new_set =
             segment
-              |> PosSet.of_list
-              |> PosSet.union set in
-        go next new_set ms in
-    go { x = 0 ; y = 0 } PosSet.empty
+              |> List.to_seq
+              |> PosMap.of_seq
+              |> PosMap.union merge set in
+        go new_dist next new_set ms in
+    go 0 { x = 0 ; y = 0 } PosMap.empty
 
 let wire_intersections wire_a wire_b =
-    PosSet.inter wire_b wire_a
-      |> PosSet.remove { x = 0; y = 0 }
-      |> PosSet.to_seq
-      |> List.of_seq
+    let merge _key a b =
+        match (a, b) with
+        | (Some a, Some b) -> Some (a + b)
+        | _ -> None in
+    PosMap.merge merge wire_b wire_a
+      |> PosMap.remove { x = 0; y = 0 }
+      |> PosMap.bindings
 
 (* Manhattan distance from origin *)
 let manhattan_distance pos =
@@ -103,5 +109,16 @@ let problem1 (data : string) =
           |> List.map movements_to_set
           |> Array.of_list in
     wire_intersections wires.(0) wires.(1)
+      |> List.map fst
       |> List.map manhattan_distance
+      |> minimum
+
+let problem2 (data : string) =
+    let wires =
+        data
+          |> parse
+          |> List.map movements_to_set
+          |> Array.of_list in
+    wire_intersections wires.(0) wires.(1)
+      |> List.map snd
       |> minimum
