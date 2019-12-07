@@ -12,7 +12,7 @@ module PosMap = Map.Make(
   struct
     let compare a b = 2 * (compare a.x b.x) + compare a.y b.y
     type t = position
-  end )
+  end)
 
 let parse_wire (word : string) : movement =
     let to_dist xs = int_of_string (String.of_seq (List.to_seq xs)) in

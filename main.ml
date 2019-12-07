@@ -13,5 +13,7 @@ let () =
         | (3, 2) -> Day03.problem2 (data ())
         | (4, 1) -> Day04.problem1 ()
         | (4, 2) -> Day04.problem2 ()
+        | (6, 1) -> Day06.problem1 (data ())
+        | (6, 2) -> Day06.problem2 (data ())
         | _ -> failwith "Not implemented" in
     Printf.printf "%d\n" answer
