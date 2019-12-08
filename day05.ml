@@ -1,5 +1,11 @@
-let problem1 (data : string) =
+let solve (input : int) (data : string) =
     let program = Intcode.parse_program data in
-    Intcode.eval program
+    List.iter
+      (fun x ->
+        print_int x;
+        print_newline ())
+      (Intcode.eval' program [input])
 
-let problem2 = problem1
+let problem1 = solve 1
+
+let problem2 = solve 5
