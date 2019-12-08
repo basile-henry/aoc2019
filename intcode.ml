@@ -42,6 +42,13 @@ let eval (program : program) : unit =
             let output = next () in
             program.(output) <- result;
             go program_counter in
+        let jump pred =
+            let test = param 1 in
+            let jump_to = param 10 in
+            if pred test
+            then program_counter := jump_to
+            else ();
+            go program_counter in
         match opcode with
         | 1 -> apply Int.add
         | 2 -> apply Int.mul
@@ -52,6 +59,10 @@ let eval (program : program) : unit =
           print_int (param 1);
           print_newline ();
           go program_counter;
+        | 5 -> jump (fun x -> x <> 0)
+        | 6 -> jump (fun x -> x = 0)
+        | 7 -> apply (fun a b -> if a < b then 1 else 0)
+        | 8 -> apply (fun a b -> if a = b then 1 else 0)
         | 99 -> ()
         | x ->
           failwith
@@ -84,6 +95,27 @@ let example4 () =
 
 let example5 () =
     let program = [| 3; 0; 4; 0; 99; |] in
+    eval program
+
+let example6 () =
+    let program = [| 3; 9; 8; 9; 10; 9; 4; 9; 99; -1; 8|] in
+    eval program
+
+let example7 () =
+    let program =
+      [| 3; 12; 6; 12; 15; 1; 13; 14; 13; 4; 13; 99; -1; 0; 1; 9; |] in
+    eval program
+
+let example8 () =
+    let program =
+      [| 3; 3; 1105; -1; 9; 1101; 0; 0; 12; 4; 12; 99; 1; |] in
+    eval program
+
+let example9 () =
+    let program =
+        [| 3; 21; 1008; 21; 8; 20; 1005; 20; 22; 107; 8; 21; 20; 1006; 20; 31;
+        1106; 0; 36; 98; 0; 0; 1002; 21; 125; 20; 4; 20; 1105; 1; 46; 104;
+        999; 1105; 1; 46; 1101; 1000; 1; 20; 4; 20; 1105; 1; 46; 98; 99; |] in
     eval program
 
 let parse_program (data : string) : program =

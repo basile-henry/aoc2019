@@ -16,9 +16,11 @@ let () =
     | (4, 1) -> print_problem (Day04.problem1 ())
     | (4, 2) -> print_problem (Day04.problem2 ())
     | (5, 1) -> Day05.problem1 (data ())
-    | (5, 2) -> print_problem (Day05.problem2 (data ()))
+    | (5, 2) -> Day05.problem2 (data ())
     | (6, 1) -> print_problem (Day06.problem1 (data ()))
     | (6, 2) -> print_problem (Day06.problem2 (data ()))
+    | (7, 1) -> print_problem (Day07.problem1 (data ()))
+    | (7, 2) -> print_problem (Day07.problem2 (data ()))
     | (8, 1) -> print_problem (Day08.problem1 (data ()))
     | (8, 2) -> Day08.problem2 (data ())
     | _ -> failwith "Not implemented"
