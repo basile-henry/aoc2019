@@ -1,7 +1,12 @@
 type program = int array
+type input = int list
+type output =
+  { need_more_input : bool
+  ; out_values : int list
+  }
 
 (* Step through the program as the computer *)
-let eval' (program : program) : int list -> int list =
+let eval' (program : program) : input -> output =
     let program_counter = ref 0 in
     let rec go (input : int list) =
         let next () =
@@ -43,13 +48,17 @@ let eval' (program : program) : int list -> int list =
                 go xs in
           out
         | 4 -> (* output *)
-          let out = param 1 in
-          out :: go input
+          let out_value = param 1 in
+          let output = go input in
+          { output with out_values = out_value :: output.out_values }
         | 5 -> jump (fun x -> x <> 0)
         | 6 -> jump (fun x -> x = 0)
         | 7 -> apply (fun a b -> if a < b then 1 else 0)
         | 8 -> apply (fun a b -> if a = b then 1 else 0)
-        | 99 -> []
+        | 99 ->
+            { need_more_input = false
+            ; out_values = []
+            }
         | x ->
           failwith
             (Printf.sprintf "Invalid opcode %d, pc %d" x !program_counter) in
@@ -118,25 +127,40 @@ let example4 () =
 
 let example5 () =
     let program = [| 3; 0; 4; 0; 99; |] in
-    Printf.printf "%b\n" (eval' program [1] = [1])
+    Printf.printf "%b\n" (eval' program [1] =
+      { need_more_input = false
+      ; out_values = [1]
+      })
 
 let example6 () =
     let program = [| 3; 9; 8; 9; 10; 9; 4; 9; 99; -1; 8|] in
-    Printf.printf "%b\n" (eval' program [4] = [0])
+    Printf.printf "%b\n" (eval' program [4] =
+      { need_more_input = false
+      ; out_values = [0]
+      })
 
 let example7 () =
     let program =
       [| 3; 12; 6; 12; 15; 1; 13; 14; 13; 4; 13; 99; -1; 0; 1; 9; |] in
-    Printf.printf "%b\n" (eval' program [1] = [1])
+    Printf.printf "%b\n" (eval' program [1] =
+      { need_more_input = false
+      ; out_values = [1]
+      })
 
 let example8 () =
     let program =
       [| 3; 3; 1105; -1; 9; 1101; 0; 0; 12; 4; 12; 99; 1; |] in
-    Printf.printf "%b\n" (eval' program [1] = [1])
+    Printf.printf "%b\n" (eval' program [1] =
+      { need_more_input = false
+      ; out_values = [1]
+      })
 
 let example9 () =
     let program =
         [| 3; 21; 1008; 21; 8; 20; 1005; 20; 22; 107; 8; 21; 20; 1006; 20; 31;
         1106; 0; 36; 98; 0; 0; 1002; 21; 125; 20; 4; 20; 1105; 1; 46; 104;
         999; 1105; 1; 46; 1101; 1000; 1; 20; 4; 20; 1105; 1; 46; 98; 99; |] in
-    Printf.printf "%b\n" (eval' program [1] = [999])
+    Printf.printf "%b\n" (eval' program [1] =
+      { need_more_input = false
+      ; out_values = [999]
+      })
