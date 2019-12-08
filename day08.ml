@@ -74,4 +74,3 @@ let problem2 (data : string) =
         |> parse 25 6
         |> List.fold_left merge (Array.make (25 * 6) 2) in
     print_image 25 image;
-    0 (* dummy output *)
