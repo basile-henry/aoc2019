@@ -4,7 +4,7 @@ let solve (input : int) (data : string) =
       (fun x ->
         print_int x;
         print_newline ())
-      (Intcode.eval' program [input]).out_values
+      (Intcode.eval' program 0 [input]).out_values
 
 let problem1 = solve 1
 
