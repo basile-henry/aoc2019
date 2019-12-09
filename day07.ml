@@ -1,9 +1,9 @@
 let rec amplifiers program setting input : int =
     match setting with
     | [] -> failwith "Expected non empty setting"
-    | [x] -> List.hd (Intcode.eval' (Array.copy program) 0 [x; input;]).out_values
+    | [x] -> List.hd (Intcode.eval' (Intcode.copy_program program) 0 [x; input;]).out_values
     | x::xs ->
-      let y = List.hd (Intcode.eval' (Array.copy program) 0 [x; input;]).out_values in
+      let y = List.hd (Intcode.eval' (Intcode.copy_program program) 0 [x; input;]).out_values in
       amplifiers program xs y
 
 type amplifier =
@@ -13,7 +13,7 @@ let feedback_amplifiers program setting : int =
     let (amps : amplifier list) =
         List.map
           (fun s ->
-            let p = Array.copy program in
+            let p = Intcode.copy_program program in
             let out = Intcode.eval' p 0 [s] in
             ref (out.program_counter, p))
           setting in
