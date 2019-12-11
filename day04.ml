@@ -1,3 +1,5 @@
+open Util
+
 let rec rev_digits x =
     if x = 0
     then []
@@ -35,8 +37,7 @@ let has_two_consecutive x =
     | _ -> failwith "Fewer than 3 digits"
 
 let solve filter =
-    let range = Util.range 402328 864247 in
-    let passwords = List.filter filter range in
+    let passwords = List.filter filter (range 402328 864247) in
     List.length passwords
 
 let problem1 () =

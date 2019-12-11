@@ -2,12 +2,10 @@ type ram = int array ref
 type program =
   { ram : ram
   ; relative_base : int ref
+  ; program_counter : int ref
   }
 type input = int list
-type output =
-  { out_values : int list
-  ; program_counter : int
-  }
+type output = int list
 
 let resize (ram : ram) (size : int) : unit =
     let len = Array.length !ram in
@@ -26,12 +24,11 @@ let write (ram : ram) (ix : int) (x: int) : unit =
     !ram.(ix) <- x
 
 (* Step through the program as the computer *)
-let eval' (program : program) (initial_pc : int) : input -> output =
-    let program_counter = ref initial_pc in
+let eval' (program : program) : input -> output =
     let rec go (input : int list) =
         let next () =
-            let out = read program.ram (!program_counter) in
-            incr program_counter;
+            let out = read program.ram !(program.program_counter) in
+            incr program.program_counter;
             out in
 
         let instr = next () in
@@ -62,9 +59,13 @@ let eval' (program : program) (initial_pc : int) : input -> output =
             let test = param 1 in
             let jump_to = param 10 in
             if pred test
-            then program_counter := jump_to
+            then program.program_counter := jump_to
             else ();
             go input in
+
+        let halt () =
+            decr program.program_counter;
+            [] in
 
         match opcode with
         | 1 -> apply Int.add
@@ -72,18 +73,14 @@ let eval' (program : program) (initial_pc : int) : input -> output =
         | 3 -> (* input *)
           let out =
               match input with
-              | [] ->
-                { out_values = []
-                ; program_counter = !program_counter - 1
-                }
+              | [] -> halt ()
               | x::xs ->
                 write program.ram (output 1) x;
                 go xs in
           out
         | 4 -> (* output *)
           let out_value = param 1 in
-          let out = go input in
-          { out with out_values = out_value :: out.out_values }
+          out_value :: go input
         | 5 -> jump (fun x -> x <> 0)
         | 6 -> jump (fun x -> x = 0)
         | 7 -> apply (fun a b -> if a < b then 1 else 0)
@@ -92,25 +89,26 @@ let eval' (program : program) (initial_pc : int) : input -> output =
             let arg = param 1 in
             program.relative_base := !(program.relative_base) + arg;
             go input
-        | 99 ->
-            { out_values = []
-            ; program_counter = !program_counter - 1
-            }
+        | 99 -> halt ()
         | x ->
           failwith
-            (Printf.sprintf "Invalid opcode %d, pc %d" x !program_counter) in
+            (Printf.sprintf "Invalid opcode %d, pc %d" x !(program.program_counter)) in
     go
 
 let eval (program : program) =
-    let _ = eval' program 0 [] in
+    let _ = eval' program [] in
     ()
 
 let simple_program (ram : int array) : program =
-    { ram = ref ram; relative_base = ref 0 }
+    { ram = ref ram
+    ; relative_base = ref 0
+    ; program_counter = ref 0
+    }
 
 let copy_program (program : program) : program =
   { ram = ref (Array.copy !(program.ram))
   ; relative_base = ref !(program.relative_base)
+  ; program_counter = ref !(program.program_counter)
   }
 
 let parse_program (data : string) : program =
@@ -175,46 +173,46 @@ let example4 () =
 
 let example5 () =
     let program = simple_program [| 3; 0; 4; 0; 99; |] in
-    Printf.printf "%b\n" ((eval' program 0 [1]).out_values = [1])
+    Printf.printf "%b\n" (eval' program [1] = [1])
 
 let example6 () =
     let program = simple_program [| 3; 9; 8; 9; 10; 9; 4; 9; 99; -1; 8|] in
-    Printf.printf "%b\n" ((eval' program 0 [4]).out_values = [0])
+    Printf.printf "%b\n" (eval' program [4] = [0])
 
 let example7 () =
     let program = simple_program
       [| 3; 12; 6; 12; 15; 1; 13; 14; 13; 4; 13; 99; -1; 0; 1; 9; |] in
-    Printf.printf "%b\n" ((eval' program 0 [1]).out_values = [1])
+    Printf.printf "%b\n" (eval' program [1] = [1])
 
 let example8 () =
     let program = simple_program
       [| 3; 3; 1105; -1; 9; 1101; 0; 0; 12; 4; 12; 99; 1; |] in
-    Printf.printf "%b\n" ((eval' program 0 [1]).out_values = [1])
+    Printf.printf "%b\n" (eval' program [1] = [1])
 
 let example9 () =
     let program = simple_program
         [| 3; 21; 1008; 21; 8; 20; 1005; 20; 22; 107; 8; 21; 20; 1006; 20; 31;
         1106; 0; 36; 98; 0; 0; 1002; 21; 125; 20; 4; 20; 1105; 1; 46; 104;
         999; 1105; 1; 46; 1101; 1000; 1; 20; 4; 20; 1105; 1; 46; 98; 99; |] in
-    Printf.printf "%b\n" ((eval' program 0 [1]).out_values = [999])
+    Printf.printf "%b\n" (eval' program [1] = [999])
 
 let example10 () =
   let output =
       [ 109; 1; 204; -1; 1001; 100; 1; 100; 1008; 100; 16; 101; 1006; 101; 0; 99; ] in
   let program = simple_program (Array.of_list output) in
-  Printf.printf "%b\n" ((eval' program 0 []).out_values = output)
+  Printf.printf "%b\n" (eval' program [] = output)
 
 let example11 () =
   let program = simple_program
       [| 1102; 34915192; 34915192; 7; 4; 7; 99; 0; |] in
-  Printf.printf "%b\n" ((eval' program 0 []).out_values = [1219070632396864])
+  Printf.printf "%b\n" (eval' program [] = [1219070632396864])
 
 let example12 () =
   let program = simple_program
       [| 104; 1125899906842624; 99; |] in
-  Printf.printf "%b\n" ((eval' program 0 []).out_values = [1125899906842624])
+  Printf.printf "%b\n" (eval' program [] = [1125899906842624])
 
 let example13 () =
   let program = simple_program
       [| 109; 5; 203; 5; 4; 10; 99; 0; |] in
-  Printf.printf "%b\n" ((eval' program 0 [473]).out_values = [473]);
+  Printf.printf "%b\n" (eval' program [473] = [473]);

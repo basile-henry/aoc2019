@@ -1,13 +1,4 @@
-type position =
-  { x : int
-  ; y : int
-  }
-
-module PosSet = Set.Make(
-  struct
-    let compare a b = 2 * (compare a.x b.x) + compare a.y b.y
-    type t = position
-  end)
+open Util
 
 let gcd (a : int) (b : int) : int =
     let rec go (a : int) (b : int) : int =

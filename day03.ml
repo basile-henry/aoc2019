@@ -1,18 +1,9 @@
-type direction = L | U | D | R
+open Util
+
 type movement =
   { direction : direction
   ; distance : int
   }
-type position =
-  { x : int
-  ; y : int
-  }
-
-module PosMap = Map.Make(
-  struct
-    let compare a b = 2 * (compare a.x b.x) + compare a.y b.y
-    type t = position
-  end)
 
 let parse_wire (word : string) : movement =
     let to_dist xs = int_of_string (String.of_seq (List.to_seq xs)) in
@@ -52,25 +43,25 @@ let movements_to_set : movement list -> int PosMap.t =
           match m.direction with
           | L ->
               let up_to = current.x - m.distance in
-              ( Util.range current.x up_to
+              ( range current.x up_to
                   |> List.mapi (fun i x -> ({ current with x = x }, dist + i))
               , { current with x = up_to }
               )
           | U ->
               let up_to = current.y + m.distance in
-              ( Util.range current.y up_to
+              ( range current.y up_to
                   |> List.mapi (fun i y -> ({ current with y = y }, dist + i))
               , { current with y = up_to }
               )
           | D ->
               let up_to = current.y - m.distance in
-              ( Util.range current.y up_to
+              ( range current.y up_to
                   |> List.mapi (fun i y -> ({ current with y = y }, dist + i))
               , { current with y = up_to }
               )
           | R ->
               let up_to = current.x + m.distance in
-              ( Util.range current.x up_to
+              ( range current.x up_to
                   |> List.mapi (fun i x -> ({ current with x = x }, dist + i))
               , { current with x = up_to }
               ) in

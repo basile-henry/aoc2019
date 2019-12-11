@@ -1,29 +1,26 @@
+open Util
+
 let rec amplifiers program setting input : int =
     match setting with
     | [] -> failwith "Expected non empty setting"
-    | [x] -> List.hd (Intcode.eval' (Intcode.copy_program program) 0 [x; input;]).out_values
+    | [x] -> List.hd (Intcode.eval' (Intcode.copy_program program) [x; input;])
     | x::xs ->
-      let y = List.hd (Intcode.eval' (Intcode.copy_program program) 0 [x; input;]).out_values in
+      let y = List.hd (Intcode.eval' (Intcode.copy_program program) [x; input;]) in
       amplifiers program xs y
 
-type amplifier =
-  (int * Intcode.program) ref
-
 let feedback_amplifiers program setting : int =
-    let (amps : amplifier list) =
+    let (amps : Intcode.program list) =
         List.map
           (fun s ->
             let p = Intcode.copy_program program in
-            let out = Intcode.eval' p 0 [s] in
-            ref (out.program_counter, p))
+            let _ = Intcode.eval' p [s] in
+            p)
           setting in
     let rec row prev_output = function
         | [] -> Some prev_output
-        | amp::ps ->
-          let (pc, p) = !amp in
-          let out = Intcode.eval' p pc [prev_output] in
-          amp := (out.program_counter, p);
-          match out.out_values with
+        | p::ps ->
+          let out = Intcode.eval' p [prev_output] in
+          match out with
           | [] -> None
           | [x] -> row x ps
           | _ -> failwith "Expected one output only" in
@@ -38,7 +35,7 @@ let settings (start : int) : int list list =
         if List.length pred = 5
         then [pred]
         else
-          Util.range start (start + 5)
+          range start (start + 5)
           |> List.filter (fun i -> not (List.mem i pred))
           |> List.map (fun i -> go (List.cons i pred))
           |> List.concat in
