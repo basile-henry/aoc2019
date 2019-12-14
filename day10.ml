@@ -1,10 +1,5 @@
 open Util
 
-let gcd (a : int) (b : int) : int =
-    let rec go (a : int) (b : int) : int =
-        if b = 0 then a else go b (a mod b) in
-    go (abs a) (abs b)
-
 type ratio = (int * int)
 
 let angle ((a, b) : ratio) : float =
