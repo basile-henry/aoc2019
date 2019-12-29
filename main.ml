@@ -31,6 +31,8 @@ let () =
     | (11, 2) -> Day11.problem2 (data ())
     | (12, 1) -> print_problem (Day12.problem1 (data ()))
     | (12, 2) -> print_problem (Day12.problem2 (data ()))
+    | (13, 1) -> print_problem (Day13.problem1 (data ()))
+    | (13, 2) -> print_problem (Day13.problem2 (data ()))
     | (14, 1) -> print_problem (Day14.problem1 (data ()))
     | (14, 2) -> print_problem (Day14.problem2 (data ()))
     | (15, 1) -> print_problem (Day15.problem1 (data ()))
