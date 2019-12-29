@@ -33,3 +33,6 @@ let lcm (x : int) (y : int) : int =
     | (_, 0) -> 0
     | (0, _) -> 0
     | _      -> abs ((Int.div x (gcd x y)) * y)
+
+let sum =
+    List.fold_left (fun x acc -> x + acc) 0

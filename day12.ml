@@ -50,9 +50,6 @@ let simulate3d (steps : int) ((pos, vel) : planets3) : planets3 =
     let v = transpose (List.map snd out) in
     (p, v)
 
-let sum =
-    List.fold_left (fun x acc -> x + acc) 0
-
 let total_energy ((pos, vel) : planets3) : int =
     let energy x = 
         x
