@@ -117,5 +117,23 @@ let problem1 (data : string) : int =
     let state = search program init_state all_dirs in
     Option.get state.shortest_moves
 
-let problem2 (_data : string) : int =
-    failwith "todo"
+let rec fill_duration map pos minute = function
+    | [] -> minute
+    | dir::dirs ->
+      match PosMap.find_opt pos map with
+      | Some Wall -> 0
+      | _ ->
+        let next_dirs =
+            List.filter (fun x -> x != reverse_dir dir) all_dirs in
+        max
+          (fill_duration map (move pos dir) (minute + 1) next_dirs)
+          (fill_duration map pos minute dirs)
+
+let problem2 (data : string) : int =
+    let program = Intcode.parse_program data in
+    let state = search program init_state all_dirs in
+    let oxygen_pos =
+        PosMap.bindings state.map
+        |> List.find (fun (_, t) -> t = Oxygen)
+        |> fst in
+    fill_duration state.map oxygen_pos 0 all_dirs
